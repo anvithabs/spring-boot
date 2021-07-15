@@ -92,13 +92,13 @@ public class EnvironmentEndpoint {
 	private EnvironmentDescriptor getEnvironmentDescriptor(Predicate<String> propertyNamePredicate) {
 		PlaceholdersResolver resolver = getResolver();
 		List<PropertySourceDescriptor> propertySources = new ArrayList<>();
-		getEffectivePropertySourceAsMap().forEach((sourceName, source) -> {
-			if (source instanceof EnumerablePropertySource) {
+		getEffectiveProperties().forEach((sourceName, source) -> {
+			/*if (source instanceof EnumerablePropertySource) {
 				propertySources.add(describeSource(sourceName, (EnumerablePropertySource<?>) source, resolver,
 						propertyNamePredicate));
-			}
+			}*/
 		});
-		return new EnvironmentDescriptor(Arrays.asList(this.environment.getActiveProfiles()), propertySources);
+		return new EnvironmentDescriptor(Arrays.asList(this.environment.getActiveProfiles()), new ArrayList<>(getEffectiveProperties().values()));
 	}
 
 	private EnvironmentEntryDescriptor getEnvironmentEntryDescriptor(String propertyName) {
@@ -127,7 +127,7 @@ public class EnvironmentEndpoint {
 	private Map<String, PropertyValueDescriptor> getPropertySourceDescriptors(String propertyName) {
 		Map<String, PropertyValueDescriptor> propertySources = new LinkedHashMap<>();
 		PlaceholdersResolver resolver = getResolver();
-		getEffectivePropertySourceAsMap().forEach((sourceName, source) -> propertySources.put(sourceName,
+		getPropertySourcesAsMap().forEach((sourceName, source) -> propertySources.put(sourceName,
 				source.containsProperty(propertyName) ? describeValueOf(propertyName, source, resolver) : null));
 		return propertySources;
 	}
@@ -162,17 +162,17 @@ public class EnvironmentEndpoint {
 		return map;
 	}
 
-	private Map<String, PropertySource<?>> getEffectivePropertySourceAsMap()
+	private Map<String, Object> getEffectiveProperties()
 	{
-		Map<String, PropertySource<?>> map = getPropertySourcesAsMap();
+		Map<String, Object> map = new LinkedHashMap<>();
 		for(PropertySource<?> propertySource : ((ConfigurableEnvironment) this.environment).getPropertySources()){
 			if(propertySource instanceof EnumerablePropertySource) {
 				for(String key : ((EnumerablePropertySource<?>) propertySource).getPropertyNames()){
-					map.putIfAbsent(key, (PropertySource<?>)propertySource.getProperty(key));
+					map.putIfAbsent(key, propertySource.getProperty(key));
 				}
 			}
 		}
-		Map<String, PropertySource<?>> sortedMap = new TreeMap<>(map);
+		Map<String, Object> sortedMap = new TreeMap<>(map);
 		return sortedMap;
 	}
 

@@ -85,6 +85,21 @@ class EnvironmentEndpointTests {
 	}
 
 	@Test
+	void effectivePropertySourceTest(){
+		ConfigurableEnvironment environment = emptyEnvironment();
+		environment.getPropertySources().addLast(singleKeyPropertySource("one", "my.key", "first"));
+		environment.getPropertySources().addLast(singleKeyPropertySource("two", "my.key", "second"));
+		EnvironmentDescriptor descriptor = new EnvironmentEndpoint(environment).environment(null);
+		/*Map<String, PropertySourceDescriptor> sources = propertySources(descriptor);
+		for (Map.Entry<String, PropertySourceDescriptor> entry : sources.entrySet()) {
+			System.out.println(entry.getKey() + ":" + entry.getValue().getName());
+		}*/
+		//validate if shows the currently used source
+
+
+	}
+
+	@Test
 	void compositeSourceIsHandledCorrectly() {
 		ConfigurableEnvironment environment = emptyEnvironment();
 		CompositePropertySource source = new CompositePropertySource("composite");
