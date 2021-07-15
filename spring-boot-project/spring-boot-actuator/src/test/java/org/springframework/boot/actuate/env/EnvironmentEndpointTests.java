@@ -76,6 +76,9 @@ class EnvironmentEndpointTests {
 		EnvironmentDescriptor descriptor = new EnvironmentEndpoint(environment).environment(null);
 		assertThat(descriptor.getActiveProfiles()).isEmpty();
 		Map<String, PropertySourceDescriptor> sources = propertySources(descriptor);
+		for (Map.Entry<String, PropertySourceDescriptor> entry : sources.entrySet()) {
+			System.out.println(entry.getKey() + ":" + entry.getValue().getName());
+		}
 		assertThat(sources.keySet()).containsExactly("one", "two");
 		assertThat(sources.get("one").getProperties()).containsOnlyKeys("my.key");
 		assertThat(sources.get("two").getProperties()).containsOnlyKeys("my.key");

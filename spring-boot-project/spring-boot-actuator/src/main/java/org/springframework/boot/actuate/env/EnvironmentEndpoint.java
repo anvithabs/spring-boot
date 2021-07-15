@@ -92,7 +92,7 @@ public class EnvironmentEndpoint {
 	private EnvironmentDescriptor getEnvironmentDescriptor(Predicate<String> propertyNamePredicate) {
 		PlaceholdersResolver resolver = getResolver();
 		List<PropertySourceDescriptor> propertySources = new ArrayList<>();
-		getPropertySourcesAsMap().forEach((sourceName, source) -> {
+		getEffectivePropertySourceAsMap().forEach((sourceName, source) -> {
 			if (source instanceof EnumerablePropertySource) {
 				propertySources.add(describeSource(sourceName, (EnumerablePropertySource<?>) source, resolver,
 						propertyNamePredicate));
@@ -127,7 +127,7 @@ public class EnvironmentEndpoint {
 	private Map<String, PropertyValueDescriptor> getPropertySourceDescriptors(String propertyName) {
 		Map<String, PropertyValueDescriptor> propertySources = new LinkedHashMap<>();
 		PlaceholdersResolver resolver = getResolver();
-		getPropertySourcesAsMap().forEach((sourceName, source) -> propertySources.put(sourceName,
+		getEffectivePropertySourceAsMap().forEach((sourceName, source) -> propertySources.put(sourceName,
 				source.containsProperty(propertyName) ? describeValueOf(propertyName, source, resolver) : null));
 		return propertySources;
 	}
@@ -168,7 +168,7 @@ public class EnvironmentEndpoint {
 		for(PropertySource<?> propertySource : ((ConfigurableEnvironment) this.environment).getPropertySources()){
 			if(propertySource instanceof EnumerablePropertySource) {
 				for(String key : ((EnumerablePropertySource<?>) propertySource).getPropertyNames()){
-					map.putIfAbsent(key, propertySource);
+					map.putIfAbsent(key, (PropertySource<?>)propertySource.getProperty(key));
 				}
 			}
 		}
