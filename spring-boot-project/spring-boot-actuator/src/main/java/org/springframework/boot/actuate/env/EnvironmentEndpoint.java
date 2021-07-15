@@ -16,11 +16,7 @@
 
 package org.springframework.boot.actuate.env;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -165,6 +161,21 @@ public class EnvironmentEndpoint {
 		}
 		return map;
 	}
+
+	private Map<String, PropertySource<?>> getEffectivePropertySourceAsMap()
+	{
+		Map<String, PropertySource<?>> map = getPropertySourcesAsMap();
+		for(PropertySource<?> propertySource : ((ConfigurableEnvironment) this.environment).getPropertySources()){
+			if(propertySource instanceof EnumerablePropertySource) {
+				for(String key : ((EnumerablePropertySource<?>) propertySource).getPropertyNames()){
+					map.putIfAbsent(key, propertySource);
+				}
+			}
+		}
+		Map<String, PropertySource<?>> sortedMap = new TreeMap<>(map);
+		return sortedMap;
+	}
+
 
 	private MutablePropertySources getPropertySources() {
 		if (this.environment instanceof ConfigurableEnvironment) {
